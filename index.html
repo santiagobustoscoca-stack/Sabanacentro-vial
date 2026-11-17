@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seguridad Vial Motociclistas — Sabana Centro</title>
+  <meta name="description" content="Plataforma regional para reducir la incidencia de motociclistas como víctimas de siniestros viales en Sabana Centro (Chía, Cota, Cajicá y Zipaquirá)." />
+  <style>
+    :root {
+      --bg: #0b1120;
+      --surface: #111827;
+      --surface-light: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #f59e0b;
+      --primary-dark: #d97706;
+      --emerald: #10b981;
+      --sky: #38bdf8;
+      --purple: #a855f7;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* Barra de estado SSL y Navegación */
+    .ssl-banner {
+      background: linear-gradient(90deg, #064e3b, #0f172a);
+      border-bottom: 1px solid #059669;
+      padding: 0.45rem 1.5rem;
+      font-size: 0.82rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .ssl-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: #6ee7b7;
+      font-weight: 600;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(11, 17, 32, 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .logo {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .logo span {
+      background: var(--primary);
+      color: #000;
+      padding: 0.15rem 0.55rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 800;
+    }
+
+    nav {
+      display: flex;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.92rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    nav a:hover {
+      color: var(--primary);
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+    }
+
+    /* Hero - Nivel 3 Objetivo Central */
+    .hero {
+      background: radial-gradient(circle at top right, rgba(245, 158, 11, 0.16), transparent 50%),
+                  linear-gradient(180deg, var(--surface), var(--bg));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 3rem 2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .level-tag {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .tag-central {
+      background: rgba(168, 85, 247, 0.18);
+      color: #d8b4fe;
+      border: 1px solid rgba(168, 85, 247, 0.45);
+    }
+
+    .tag-fines {
+      background: rgba(16, 185, 129, 0.16);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .tag-especificos {
+      background: rgba(56, 189, 248, 0.16);
+      color: #7dd3fc;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+    }
+
+    .hero h1 {
+      font-size: clamp(1.75rem, 3.2vw, 2.6rem);
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      color: #fff;
+    }
+
+    .hero p {
+      color: var(--muted);
+      max-width: 820px;
+      font-size: 1.05rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.35rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.15s, background 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #0f172a;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-outline {
+      background: var(--surface-light);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    /* Secciones */
+    section {
+      margin-bottom: 3.5rem;
+    }
+
+    .section-header {
+      margin-bottom: 1.75rem;
+    }
+
+    .section-header h2 {
+      font-size: 1.65rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .section-header p {
+      color: var(--muted);
+    }
+
+    /* Grid de Indicadores (Niveles 1 y 2) */
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--emerald);
+      margin-bottom: 0.35rem;
+    }
+
+    .card h3 {
+      font-size: 1.08rem;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+
+    .card p {
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    /* Fines Indirectos Pills */
+    .indirect-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 0.9rem;
+      margin-top: 1.5rem;
+    }
+
+    .indirect-item {
+      background: rgba(16, 185, 129, 0.07);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 10px;
+      padding: 0.95rem 1.15rem;
+      font-size: 0.92rem;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    /* Objetivos Específicos + Medios (Niveles 4 y 5) */
+    .axes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(265px, 1fr));
+      gap: 1.35rem;
+    }
+
+    .axis-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--sky);
+      border-radius: 14px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .axis-code {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--sky);
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+
+    .medios-box {
+      margin-top: 1.2rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+
+    .medios-box span {
+      display: block;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .medios-box ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .medios-box li {
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      padding-left: 1rem;
+      position: relative;
+    }
+
+    .medios-box li::before {
+      content: "•";
+      color: var(--primary);
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+
+    /* Filtro de Municipios Foco */
+    .filter-bar {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+
+    .filter-btn {
+      background: var(--surface);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.88rem;
+    }
+
+    .filter-btn.active {
+      background: var(--primary);
+      color: #000;
+      border-color: var(--primary);
+    }
+
+    .muni-detail {
+      background: var(--surface-light);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.35rem;
+    }
+
+    /* Sección de Mensajería Sincrónica y Asincrónica */
+    .comms-layout {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .channel-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    .channel-btn {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.95rem 1.15rem;
+      border-radius: 10px;
+      background: var(--surface-light);
+      border: 1px solid var(--border);
+      color: var(--text);
+      text-decoration: none;
+      transition: border-color 0.2s;
+    }
+
+    .channel-btn:hover {
+      border-color: var(--primary);
+    }
+
+    .channel-meta small {
+      display: block;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .badge-live {
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    /* Formulario Asincrónico (IMAP / POP3) */
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 0.75rem 0.95rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.92rem;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .form-status {
+      font-size: 0.88rem;
+      color: var(--emerald);
+      display: none;
+      margin-top: 0.5rem;
+    }
+
+    /* Footer y Arquitectura SSL */
+    footer {
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      padding: 2rem 1.5rem;
+      margin-top: 3rem;
+    }
+
+    .footer-grid {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .footer-grid h4 {
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra superior de verificación SSL/TLS -->
+  <div class="ssl-banner">
+    <div class="ssl-badge" id="ssl-status-text">
+      🔒 Conexión Cifrada HTTPS/TLS — Certificado DV (90 días / ZeroSSL)
+    </div>
+    <div style="color: #cbd5e1;">
+      Corredor Sabana Centro: Chía • Cota • Cajicá • Zipaquirá
+    </div>
+  </div>
+
+  <header>
+    <div class="logo">
+      <span>SV-SC</span> Observatorio Motociclistas Sabana Centro
+    </div>
+    <nav>
+      <a href="#objetivo-central">Propósito Central</a>
+      <a href="#fines">Fines e Impacto</a>
+      <a href="#ejes-medios">Objetivos y Medios</a>
+      <a href="#municipios">Municipios Foco</a>
+      <a href="#mensajeria">Mensajería</a>
+    </nav>
+  </header>
+
+  <main class="container">
+
+    <!-- NIVEL 3: OBJETIVO CENTRAL -->
+    <section id="objetivo-central" class="hero">
+      <span class="level-tag tag-central">Nivel 3 — Objetivo Central (Propósito Principal)</span>
+      <h1>Reducir la incidencia de motociclistas como víctimas de siniestros viales en Sabana Centro</h1>
+      <p>
+        Estrategia regional articulada entre infraestructura segura, conducción responsable, educación vial focalizada y control tecnológico para proteger la vida de los motociclistas en los corredores de Chía, Cota, Cajicá y Zipaquirá.
+      </p>
+      <div class="hero-actions">
+        <a href="#ejes-medios" class="btn btn-primary">Explorar Ejes y Medios</a>
+        <a href="#mensajeria" class="btn btn-outline">Reportar Punto Crítico</a>
+      </div>
+    </section>
+
+    <!-- NIVEL 2 Y NIVEL 1: FINES DIRECTOS E INDIRECTOS -->
+    <section id="fines">
+      <div class="section-header">
+        <span class="level-tag tag-fines">Niveles 1 y 2 — Fines Directos e Indirectos</span>
+        <h2>Impacto Esperado en Salud Pública y Movilidad Regional</h2>
+        <p>Resultados directos sobre la siniestralidad y beneficios socioeconómicos derivados en Sabana Centro.</p>
+      </div>
+
+      <div class="grid-cards">
+        <div class="card">
+          <div class="stat-number">-47%</div>
+          <h3>Menor mortalidad de motociclistas</h3>
+          <p>Reducción directa frente a la participación de motociclistas en fallecimientos viales (referencia 47% en 2024).</p>
+        </div>
+        <div class="card">
+          <div class="stat-number">-39,7%</div>
+          <h3>Menos lesionados con secuelas permanentes</h3>
+          <p>Disminución de traumatismos graves y discapacidades derivadas de colisiones en vías intermunicipales.</p>
+        </div>
+        <div class="card">
+          <div class="stat-number">18–59 años</div>
+          <h3>Menos víctimas en edad productiva</h3>
+          <p>Protección del segmento poblacional laboralmente activo que depende de la motocicleta para su sustento.</p>
+        </div>
+        <div class="card">
+          <div class="stat-number">4 Municipios</div>
+          <h3>Menor siniestralidad en municipios foco</h3>
+          <p>Intervención priorizada en los corredores de mayor flujo: Chía, Cota, Cajicá y Zipaquirá.</p>
+        </div>
+      </div>
+
+      <div class="indirect-grid">
+        <div class="indirect-item">✅ <strong>Fin Indirecto 1:</strong> Menor presión sobre el sistema de salud regional.</div>
+        <div class="indirect-item">✅ <strong>Fin Indirecto 2:</strong> Se conserva el capital humano en edad productiva.</div>
+        <div class="indirect-item">✅ <strong>Fin Indirecto 3:</strong> Menos pobreza y vulnerabilidad en los hogares.</div>
+        <div class="indirect-item">✅ <strong>Fin Indirecto 4:</strong> Mejor percepción y cultura de formalidad en las vías.</div>
+        <div class="indirect-item">✅ <strong>Fin Indirecto 5:</strong> Menores costos por incapacidades y años de vida perdidos.</div>
+        <div class="indirect-item">✅ <strong>Fin Indirecto 6:</strong> La moto se consolida como transporte sostenible.</div>
+      </div>
+    </section>
+
+    <!-- NIVEL 4 Y NIVEL 5: OBJETIVOS ESPECÍFICOS Y MEDIOS -->
+    <section id="ejes-medios">
+      <div class="section-header">
+        <span class="level-tag tag-especificos">Niveles 4 y 5 — Objetivos Específicos y Medios</span>
+        <h2>Cuatro Pilares Operativos de Intervención</h2>
+        <p>Cada objetivo específico se ejecuta mediante acciones concretas en infraestructura, cultura y tecnología.</p>
+      </div>
+
+      <div class="axes-grid">
+        <article class="axis-card">
+          <div>
+            <div class="axis-code">Objetivo Específico A</div>
+            <h3>Infraestructura vial segura y adaptada a motocicletas</h3>
+            <p>Adecuación geométrica, señalización antideslizante y eliminación de puntos ciegos en vías urbanas y variantes.</p>
+          </div>
+          <div class="medios-box">
+            <span>Nivel 5 — Medios</span>
+            <ul>
+              <li>Planificación vial acorde al crecimiento del parque automotor de motos.</li>
+              <li>Prioridad a usuarios vulnerables sobre el vehículo particular.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="axis-card">
+          <div>
+            <div class="axis-code">Objetivo Específico B</div>
+            <h3>Conducción responsable: velocidad, casco y sobriedad</h3>
+            <p>Promoción de hábitos seguros, uso de elementos de protección certificados y estado técnico óptimo del vehículo.</p>
+          </div>
+          <div class="medios-box">
+            <span>Nivel 5 — Medios</span>
+            <ul>
+              <li>Revisión técnico-mecánica y mantenimiento preventivo de las motos.</li>
+              <li>Alertas geolocalizadas en zonas de riesgo y tramos de alta siniestralidad.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="axis-card">
+          <div>
+            <div class="axis-code">Objetivo Específico C</div>
+            <h3>Educación vial focalizada en motociclistas</h3>
+            <p>Capacitación práctica en frenado de emergencia, visibilidad y convivencia con transporte de carga.</p>
+          </div>
+          <div class="medios-box">
+            <span>Nivel 5 — Medios</span>
+            <ul>
+              <li>Formación y licenciamiento riguroso de conductores.</li>
+              <li>Recursos de educación vial accesibles y gratuitos en línea.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="axis-card">
+          <div>
+            <div class="axis-code">Objetivo Específico D</div>
+            <h3>Control y vigilancia efectivos de las normas</h3>
+            <p>Supervisión coordinada entre autoridades de tránsito municipales y departamentales en puntos críticos.</p>
+          </div>
+          <div class="medios-box">
+            <span>Nivel 5 — Medios</span>
+            <ul>
+              <li>Inversión en tecnología para detectar infracciones y exceso de velocidad.</li>
+              <li>Política pública regional que articule a los municipios de Sabana Centro.</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- MÓDULO INTERACTIVO MUNICIPIOS FOCO -->
+    <section id="municipios">
+      <div class="section-header">
+        <h2>Diagnóstico y Alertas por Municipio Foco</h2>
+        <p>Selecciona un municipio del corredor Sabana Centro para consultar su enfoque de intervención vial.</p>
+      </div>
+
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="mostrarMunicipio('chia', this)">Chía</button>
+        <button class="filter-btn" onclick="mostrarMunicipio('cota', this)">Cota</button>
+        <button class="filter-btn" onclick="mostrarMunicipio('cajica', this)">Cajicá</button>
+        <button class="filter-btn" onclick="mostrarMunicipio('zipaquira', this)">Zipaquirá</button>
+      </div>
+
+      <div class="muni-detail" id="muni-info">
+        <h3>Chía — Corredor Autopista Norte y Variante</h3>
+        <p style="color: #cbd5e1; margin-top: 0.4rem;">
+          Alta confluencia de motociclistas pendulares y transporte pesado. Prioridad en segregación de carriles, control de velocidad nocturno y alertas geolocalizadas en glorietas de acceso.
+        </p>
+      </div>
+    </section>
+
+    <!-- MENSAJERÍA SINCRÓNICA Y ASINCRÓNICA -->
+    <section id="mensajeria">
+      <div class="section-header">
+        <h2>Canales de Atención y Reporte Ciudadano</h2>
+        <p>Arquitectura de comunicación en tiempo real (sincrónica) y gestión documental por correo electrónico (asincrónica).</p>
+      </div>
+
+      <div class="comms-layout">
+        <!-- Columna 1: Mensajería Sincrónica -->
+        <div class="card">
+          <h3>⚡ Mensajería Sincrónica (Tiempo Real)</h3>
+          <p>Atención inmediata para alertas viales, emergencias y consultas en vivo desde web o móvil.</p>
+
+          <div class="channel-list">
+            <a href="javascript:void(0)" onclick="abrirChatWeb()" class="channel-btn">
+              <div class="channel-meta">
+                <strong>1. Chat Web Embebido (Script JS)</strong>
+                <small>Widget en vivo integrado mediante Tawk.to / JivoChat</small>
+              </div>
+              <span class="badge-live">En línea</span>
+            </a>
+
+            <a href="https://wa.me/573000000000?text=Hola,%20deseo%20reportar%20una%20alerta%20vial%20para%20motociclistas%20en%20Sabana%20Centro" target="_blank" rel="noopener" class="channel-btn">
+              <div class="channel-meta">
+                <strong>2. Integración Móvil — WhatsApp</strong>
+                <small>Línea directa de reporte rápido desde smartphone</small>
+              </div>
+              <span class="badge-live">Móvil</span>
+            </a>
+
+            <a href="https://t.me/SeguridadVialSabanaCentroBot" target="_blank" rel="noopener" class="channel-btn">
+              <div class="channel-meta">
+                <strong>3. Integración Móvil — Telegram</strong>
+                <small>Canal y bot de alertas geolocalizadas en tiempo real</small>
+              </div>
+              <span class="badge-live">Telegram</span>
+            </a>
+
+            <a href="xmpp:soporte@jabber.hot-chilli.net?message;body=Reporte%20Vial%20Sabana%20Centro" class="channel-btn">
+              <div class="channel-meta">
+                <strong>4. Protocolo Abierto XMPP</strong>
+                <small>Cliente Jabber/XMPP (soporte@jabber.hot-chilli.net)</small>
+              </div>
+              <span class="badge-live">XMPP</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Columna 2: Mensajería Asincrónica (POP3 / IMAP) -->
+        <div class="card">
+          <h3>📩 Mensajería Asincrónica (Correo POP3 / IMAP)</h3>
+          <p>Envío de reportes detallados, propuestas de infraestructura y solicitudes recibidas en bandeja institucional IMAP/POP3.</p>
+
+          <!-- Reemplaza TU_ID_FORMSPREE por el endpoint gratuito de formspree.io -->
+          <form id="asyncForm" action="https://formspree.io/f/TU_ID_FORMSPREE" method="POST">
+            <input type="text" name="nombre" placeholder="Nombre del ciudadano o motociclista" required />
+            <input type="email" name="email" placeholder="Tu correo electrónico (para respuesta IMAP/POP3)" required />
+            <select name="municipio" required>
+              <option value="">Selecciona el municipio foco...</option>
+              <option value="Chia">Chía</option>
+              <option value="Cota">Cota</option>
+              <option value="Cajica">Cajicá</option>
+              <option value="Zipaquira">Zipaquirá</option>
+            </select>
+            <textarea name="mensaje" rows="3" placeholder="Describe el punto crítico vial, falla de señalización o sugerencia..." required></textarea>
+            <button type="submit" class="btn btn-primary">Enviar Reporte por Correo (IMAP/POP3)</button>
+            <div class="form-status" id="form-status">
+              ✅ Reporte preparado. Si aún no configuras Formspree, se abrirá tu cliente de correo POP3/IMAP predeterminado.
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="footer-grid">
+      <div>
+        <h4>Entorno Web & Servidor</h4>
+        <p>Hosting gratuito activo con dominio operativo en la nube (Static Site / InfinityFree) optimizado para disponibilidad continua.</p>
+      </div>
+      <div>
+        <h4>Configuración de Certificados (Cifrado)</h4>
+        <p>Certificado SSL/TLS de <strong>Validación de Dominio (DV — 90 días / 3 meses)</strong> emitido mediante <strong>ZeroSSL</strong> para garantizar confidencialidad e integridad HTTPS.</p>
+      </div>
+      <div>
+        <h4>Arquitectura de Mensajería</h4>
+        <p>Soporte híbrido: Sincrónica (Widget JS Tawk.to/JivoChat, WhatsApp, Telegram, XMPP) y Asincrónica (Correo POP3/IMAP).</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Datos dinámicos de municipios foco (Nivel 2 del Árbol de Objetivos)
+    const datosMunicipios = {
+      chia: {
+        titulo: "Chía — Corredor Autopista Norte y Variante",
+        desc: "Alta confluencia de motociclistas pendulares y transporte pesado. Prioridad en segregación de carriles, control de velocidad nocturno y alertas geolocalizadas en glorietas de acceso."
+      },
+      cota: {
+        titulo: "Cota — Corredor Siberia – Chía (Zona Industrial)",
+        desc: "Tráfico mixto intenso con tractocamiones y flotas de carga. Enfoque en puntos ciegos, mantenimiento técnico-mecánico preventivo y campañas de visibilidad."
+      },
+      cajica: {
+        titulo: "Cajicá — Variante Cajicá y Accesos Urbanos",
+        desc: "Crecimiento acelerado del parque de motocicletas. Prioridad en infraestructura adaptada, pacificadores de tránsito y educación vial en intersecciones semaforizadas."
+      },
+      zipaquira: {
+        titulo: "Zipaquirá — Nodo Regional Norte de Sabana Centro",
+        desc: "Conexión interregional con alta exposición en vías perimetrales. Enfoque en control tecnológico de velocidad, sobriedad al conducir y licenciamiento riguroso."
+      }
+    };
+
+    function mostrarMunicipio(clave, boton) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      boton.classList.add('active');
+      const info = datosMunicipios[clave];
+      document.getElementById('muni-info').innerHTML = `
+        <h3>${info.titulo}</h3>
+        <p style="color: #cbd5e1; margin-top: 0.4rem;">${info.desc}</p>
+      `;
+    }
+
+    // Verificar protocolo HTTPS en tiempo real
+    if (window.location.protocol === 'https:') {
+      document.getElementById('ssl-status-text').innerHTML =
+        '🔒 HTTPS Activo y Verificado — Certificado SSL/TLS DV (3 meses) Operando';
+    }
+
+    // Función para abrir el widget sincrónico (Tawk.to o JivoChat)
+    function abrirChatWeb() {
+      if (typeof Tawk_API !== 'undefined' && Tawk_API.toggle) {
+        Tawk_API.toggle();
+      } else if (typeof jivo_api !== 'undefined' && jivo_api.open) {
+        jivo_api.open();
+      } else {
+        alert('Pega tu código <script> gratuito de Tawk.to o JivoChat antes de </body> para abrir el chat en vivo aquí.');
+      }
+    }
+
+    // Manejo del formulario asincrónico (Formspree + fallback mailto POP3/IMAP)
+    document.getElementById('asyncForm').addEventListener('submit', function(e) {
+      const action = this.getAttribute('action');
+      if (action.includes('TU_ID_FORMSPREE')) {
+        e.preventDefault();
+        const nombre = this.nombre.value;
+        const municipio = this.municipio.value;
+        const mensaje = this.mensaje.value;
+        document.getElementById('form-status').style.display = 'block';
+        window.location.href = `mailto:seguridadvial.sabanacentro@gmail.com?subject=Reporte%20Vial%20-%20${encodeURIComponent(municipio)}&body=Ciudadano:%20${encodeURIComponent(nombre)}%0A%0A${encodeURIComponent(mensaje)}`;
+      }
+    });
+  </script>
+
+  <!-- ===================================================================== -->
+  <!-- WIDGET DE MENSAJERÍA SINCRÓNICA WEB (SCRIPT JS)                       -->
+  <!-- Opción A (100% Gratis ilimitado): Crea cuenta en https://tawk.to y    -->
+  <!-- pega aquí tu <script> de Tawk.to.                                     -->
+  <!-- Opción B (Sugerida por profesor): Pega aquí el <script> de JivoChat.  -->
+  <!-- ===================================================================== -->
+
+</body>
+</html>
