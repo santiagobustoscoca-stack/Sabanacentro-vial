@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Seguridad Vial Motociclistas — Sabana Centro</title>
   <meta name="description" content="Plataforma regional para reducir la incidencia de motociclistas como víctimas de siniestros viales en Sabana Centro (Chía, Cota, Cajicá y Zipaquirá)." />
+
+  <!-- Leaflet CSS (Mapa interactivo 100% gratuito sin API Key) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+
   <style>
     :root {
       --bg: #0b1120;
@@ -38,7 +42,7 @@
       line-height: 1.6;
     }
 
-    /* Barra de estado SSL y Navegación */
+    /* Barra superior SSL */
     .ssl-banner {
       background: linear-gradient(90deg, #064e3b, #0f172a);
       border-bottom: 1px solid #059669;
@@ -62,8 +66,8 @@
     header {
       position: sticky;
       top: 0;
-      z-index: 100;
-      background: rgba(11, 17, 32, 0.92);
+      z-index: 1000;
+      background: rgba(11, 17, 32, 0.94);
       backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--border);
       padding: 1rem 2rem;
@@ -155,6 +159,12 @@
       border: 1px solid rgba(56, 189, 248, 0.4);
     }
 
+    .tag-mapa {
+      background: rgba(245, 158, 11, 0.16);
+      color: #fcd34d;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
     .hero h1 {
       font-size: clamp(1.75rem, 3.2vw, 2.6rem);
       line-height: 1.2;
@@ -178,15 +188,16 @@
     .btn {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 0.5rem;
-      padding: 0.75rem 1.35rem;
+      padding: 0.75rem 1.25rem;
       border-radius: 10px;
       font-weight: 600;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       text-decoration: none;
       cursor: pointer;
       border: none;
-      transition: transform 0.15s, background 0.2s;
+      transition: transform 0.15s, background 0.2s, opacity 0.2s;
     }
 
     .btn:hover {
@@ -202,13 +213,38 @@
       background: var(--primary-dark);
     }
 
+    .btn-gps {
+      background: #0284c7;
+      color: #fff;
+      width: 100%;
+    }
+
+    .btn-gps:hover {
+      background: #0369a1;
+    }
+
+    .btn-danger-sm {
+      background: rgba(239, 68, 68, 0.18);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      padding: 0.35rem 0.7rem;
+      border-radius: 7px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-danger-sm:hover {
+      background: var(--danger);
+      color: #fff;
+    }
+
     .btn-outline {
       background: var(--surface-light);
       color: var(--text);
       border: 1px solid var(--border);
     }
 
-    /* Secciones */
     section {
       margin-bottom: 3.5rem;
     }
@@ -226,7 +262,7 @@
       color: var(--muted);
     }
 
-    /* Grid de Indicadores (Niveles 1 y 2) */
+    /* Grid de Indicadores */
     .grid-cards {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -258,7 +294,6 @@
       color: var(--muted);
     }
 
-    /* Fines Indirectos Pills */
     .indirect-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
@@ -277,7 +312,7 @@
       gap: 0.65rem;
     }
 
-    /* Objetivos Específicos + Medios (Niveles 4 y 5) */
+    /* Objetivos Específicos + Medios */
     .axes-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(265px, 1fr));
@@ -340,7 +375,7 @@
       font-weight: bold;
     }
 
-    /* Filtro de Municipios Foco */
+    /* Filtro de Municipios */
     .filter-bar {
       display: flex;
       gap: 0.6rem;
@@ -370,9 +405,94 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 1.35rem;
+      margin-bottom: 1.5rem;
     }
 
-    /* Sección de Mensajería Sincrónica y Asincrónica */
+    /* SECCIÓN DE MAPA DE ALERTAS GEOLOCALIZADAS */
+    .map-workspace {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 920px) {
+      .map-workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    #mapa-vial {
+      width: 100%;
+      height: 470px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      z-index: 1;
+    }
+
+    .map-hint {
+      margin-top: 0.65rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .coords-pill {
+      background: var(--surface-light);
+      border: 1px solid var(--border);
+      padding: 0.55rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      color: #fcd34d;
+      font-family: monospace;
+      margin: 0.75rem 0;
+    }
+
+    .alerts-feed {
+      margin-top: 1.25rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1rem;
+      max-height: 250px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+
+    .alert-item {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--danger);
+      border-radius: 9px;
+      padding: 0.75rem 0.9rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .alert-item-info {
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .alert-item-info strong {
+      display: block;
+      font-size: 0.9rem;
+      color: #fff;
+    }
+
+    .alert-item-info small {
+      display: block;
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin-top: 0.15rem;
+    }
+
+    /* Mensajería */
     .comms-layout {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
@@ -418,22 +538,21 @@
       font-weight: 700;
     }
 
-    /* Formulario Asincrónico (IMAP / POP3) */
-    form {
+    form, .alert-form-box {
       display: flex;
       flex-direction: column;
-      gap: 0.9rem;
-      margin-top: 1rem;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
     }
 
     input, select, textarea {
       width: 100%;
-      padding: 0.75rem 0.95rem;
+      padding: 0.72rem 0.9rem;
       border-radius: 8px;
       border: 1px solid var(--border);
       background: var(--bg);
       color: var(--text);
-      font-size: 0.92rem;
+      font-size: 0.9rem;
     }
 
     input:focus, select:focus, textarea:focus {
@@ -442,13 +561,41 @@
     }
 
     .form-status {
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       color: var(--emerald);
       display: none;
-      margin-top: 0.5rem;
+      margin-top: 0.4rem;
     }
 
-    /* Footer y Arquitectura SSL */
+    /* Estilo popup Leaflet */
+    .leaflet-popup-content-wrapper {
+      background: #111827;
+      color: #f8fafc;
+      border: 1px solid #334155;
+      border-radius: 10px;
+    }
+
+    .leaflet-popup-tip {
+      background: #111827;
+    }
+
+    .popup-remove-btn {
+      margin-top: 8px;
+      width: 100%;
+      background: #ef4444;
+      color: #fff;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .popup-remove-btn:hover {
+      background: #dc2626;
+    }
+
     footer {
       border-top: 1px solid var(--border);
       background: var(--surface);
@@ -477,7 +624,7 @@
   <!-- Barra superior de verificación SSL/TLS -->
   <div class="ssl-banner">
     <div class="ssl-badge" id="ssl-status-text">
-      🔒 Conexión Cifrada HTTPS/TLS — Certificado DV (90 días / ZeroSSL)
+      🔒 Conexión Cifrada HTTPS/TLS — Certificado DV (90 días / Google Trust Services)
     </div>
     <div style="color: #cbd5e1;">
       Corredor Sabana Centro: Chía • Cota • Cajicá • Zipaquirá
@@ -492,7 +639,7 @@
       <a href="#objetivo-central">Propósito Central</a>
       <a href="#fines">Fines e Impacto</a>
       <a href="#ejes-medios">Objetivos y Medios</a>
-      <a href="#municipios">Municipios Foco</a>
+      <a href="#mapa-alertas">Mapa de Alertas GPS</a>
       <a href="#mensajeria">Mensajería</a>
     </nav>
   </header>
@@ -507,8 +654,8 @@
         Estrategia regional articulada entre infraestructura segura, conducción responsable, educación vial focalizada y control tecnológico para proteger la vida de los motociclistas en los corredores de Chía, Cota, Cajicá y Zipaquirá.
       </p>
       <div class="hero-actions">
-        <a href="#ejes-medios" class="btn btn-primary">Explorar Ejes y Medios</a>
-        <a href="#mensajeria" class="btn btn-outline">Reportar Punto Crítico</a>
+        <a href="#mapa-alertas" class="btn btn-primary">📍 Reportar Alerta en el Mapa</a>
+        <a href="#ejes-medios" class="btn btn-outline">Ver Ejes y Medios</a>
       </div>
     </section>
 
@@ -624,13 +771,15 @@
       </div>
     </section>
 
-    <!-- MÓDULO INTERACTIVO MUNICIPIOS FOCO -->
-    <section id="municipios">
+    <!-- MAPA INTERACTIVO DE ALERTAS GEOLOCALIZADAS (NIVEL 5 - MEDIO OPERATIVO) -->
+    <section id="mapa-alertas">
       <div class="section-header">
-        <h2>Diagnóstico y Alertas por Municipio Foco</h2>
-        <p>Selecciona un municipio del corredor Sabana Centro para consultar su enfoque de intervención vial.</p>
+        <span class="level-tag tag-mapa">Nivel 5 — Alertas Geolocalizadas en Zonas de Riesgo</span>
+        <h2>Mapa Interactivo de Alertas Viales — Sabana Centro</h2>
+        <p>Genera alertas viales usando tu <strong>ubicación GPS</strong> o <strong>haciendo clic directamente sobre el punto del mapa</strong>. También puedes eliminar cualquier alerta cuando el riesgo haya sido resuelto.</p>
       </div>
 
+      <!-- Filtro rápido por Municipio Foco -->
       <div class="filter-bar">
         <button class="filter-btn active" onclick="mostrarMunicipio('chia', this)">Chía</button>
         <button class="filter-btn" onclick="mostrarMunicipio('cota', this)">Cota</button>
@@ -643,6 +792,51 @@
         <p style="color: #cbd5e1; margin-top: 0.4rem;">
           Alta confluencia de motociclistas pendulares y transporte pesado. Prioridad en segregación de carriles, control de velocidad nocturno y alertas geolocalizadas en glorietas de acceso.
         </p>
+      </div>
+
+      <div class="map-workspace">
+        <!-- Contenedor del Mapa -->
+        <div>
+          <div id="mapa-vial"></div>
+          <div class="map-hint">
+            <span>👆 Haz clic en cualquier vía del mapa para fijar un punto de alerta.</span>
+            <span>Datos cartográficos: © OpenStreetMap</span>
+          </div>
+        </div>
+
+        <!-- Panel de Control de Alertas -->
+        <div class="card">
+          <h3>🚨 Generar o Quitar Alerta Vial</h3>
+          <p style="margin-bottom: 0.75rem;">Selecciona ubicación por GPS o tocando el mapa:</p>
+
+          <button type="button" class="btn btn-gps" onclick="obtenerUbicacionGPS()">
+            📍 Generar Alerta con mi Ubicación GPS
+          </button>
+
+          <div class="coords-pill" id="coords-display">
+            Coordenadas seleccionadas: Ninguna (haz clic en el mapa o usa GPS)
+          </div>
+
+          <div class="alert-form-box">
+            <select id="alerta-tipo">
+              <option value="⚠️ Punto crítico / Alta siniestralidad">⚠️ Punto crítico / Alta siniestralidad</option>
+              <option value="🚛 Punto ciego / Tráfico pesado">🚛 Punto ciego / Tráfico pesado</option>
+              <option value="🕳️ Vía deteriorada / Hueco peligroso">🕳️ Vía deteriorada / Hueco peligroso</option>
+              <option value="🌧️ Superficie deslizante / Baja visibilidad">🌧️ Superficie deslizante / Baja visibilidad</option>
+              <option value="🚧 Cierre vial o accidente reportado">🚧 Cierre vial o accidente reportado</option>
+            </select>
+
+            <input type="text" id="alerta-desc" placeholder="Ej: Glorieta entrada Chía, pavimento húmedo y sin señalización..." />
+
+            <button type="button" class="btn btn-primary" onclick="guardarAlertaMapa()">
+              Publicar Alerta en el Mapa
+            </button>
+          </div>
+
+          <div class="alerts-feed" id="lista-alertas-activas">
+            <!-- Las alertas creadas se listan aquí con su botón para quitar -->
+          </div>
+        </div>
       </div>
     </section>
 
@@ -699,7 +893,6 @@
           <h3>📩 Mensajería Asincrónica (Correo POP3 / IMAP)</h3>
           <p>Envío de reportes detallados, propuestas de infraestructura y solicitudes recibidas en bandeja institucional IMAP/POP3.</p>
 
-          <!-- Reemplaza TU_ID_FORMSPREE por el endpoint gratuito de formspree.io -->
           <form id="asyncForm" action="https://formspree.io/f/TU_ID_FORMSPREE" method="POST">
             <input type="text" name="nombre" placeholder="Nombre del ciudadano o motociclista" required />
             <input type="email" name="email" placeholder="Tu correo electrónico (para respuesta IMAP/POP3)" required />
@@ -726,11 +919,11 @@
     <div class="footer-grid">
       <div>
         <h4>Entorno Web & Servidor</h4>
-        <p>Hosting gratuito activo con dominio operativo en la nube (Static Site / InfinityFree) optimizado para disponibilidad continua.</p>
+        <p>Hosting gratuito activo con dominio operativo en la nube (Render Static Site) optimizado para disponibilidad continua.</p>
       </div>
       <div>
         <h4>Configuración de Certificados (Cifrado)</h4>
-        <p>Certificado SSL/TLS de <strong>Validación de Dominio (DV — 90 días / 3 meses)</strong> emitido mediante <strong>ZeroSSL</strong> para garantizar confidencialidad e integridad HTTPS.</p>
+        <p>Certificado SSL/TLS de <strong>Validación de Dominio (DV — 90 días / 3 meses)</strong> emitido por <strong>Google Trust Services (WE1)</strong> para garantizar confidencialidad e integridad HTTPS.</p>
       </div>
       <div>
         <h4>Arquitectura de Mensajería</h4>
@@ -739,27 +932,218 @@
     </div>
   </footer>
 
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
   <script>
-    // Datos dinámicos de municipios foco (Nivel 2 del Árbol de Objetivos)
+    // 1. Datos de Municipios Foco con Coordenadas de Sabana Centro
     const datosMunicipios = {
       chia: {
         titulo: "Chía — Corredor Autopista Norte y Variante",
-        desc: "Alta confluencia de motociclistas pendulares y transporte pesado. Prioridad en segregación de carriles, control de velocidad nocturno y alertas geolocalizadas en glorietas de acceso."
+        desc: "Alta confluencia de motociclistas pendulares y transporte pesado. Prioridad en segregación de carriles, control de velocidad nocturno y alertas geolocalizadas en glorietas de acceso.",
+        coords: [4.8616, -74.0325],
+        zoom: 13
       },
       cota: {
         titulo: "Cota — Corredor Siberia – Chía (Zona Industrial)",
-        desc: "Tráfico mixto intenso con tractocamiones y flotas de carga. Enfoque en puntos ciegos, mantenimiento técnico-mecánico preventivo y campañas de visibilidad."
+        desc: "Tráfico mixto intenso con tractocamiones y flotas de carga. Enfoque en puntos ciegos, mantenimiento técnico-mecánico preventivo y campañas de visibilidad.",
+        coords: [4.8092, -74.1028],
+        zoom: 13
       },
       cajica: {
         titulo: "Cajicá — Variante Cajicá y Accesos Urbanos",
-        desc: "Crecimiento acelerado del parque de motocicletas. Prioridad en infraestructura adaptada, pacificadores de tránsito y educación vial en intersecciones semaforizadas."
+        desc: "Crecimiento acelerado del parque de motocicletas. Prioridad en infraestructura adaptada, pacificadores de tránsito y educación vial en intersecciones semaforizadas.",
+        coords: [4.9186, -74.0278],
+        zoom: 13
       },
       zipaquira: {
         titulo: "Zipaquirá — Nodo Regional Norte de Sabana Centro",
-        desc: "Conexión interregional con alta exposición en vías perimetrales. Enfoque en control tecnológico de velocidad, sobriedad al conducir y licenciamiento riguroso."
+        desc: "Conexión interregional con alta exposición en vías perimetrales. Enfoque en control tecnológico de velocidad, sobriedad al conducir y licenciamiento riguroso.",
+        coords: [5.0221, -74.0048],
+        zoom: 13
       }
     };
 
+    // 2. Inicializar Mapa centrado en Sabana Centro
+    const mapa = L.map('mapa-vial').setView([4.9100, -74.0400], 11);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(mapa);
+
+    let puntoSeleccionado = null;
+    let marcadorTemporal = null;
+    let origenSeleccion = "Clic en mapa";
+    const marcadoresActivos = {};
+
+    // Cargar alertas guardadas en el navegador (localStorage)
+    let alertasGuardadas = JSON.parse(localStorage.getItem('alertas_sabana_centro')) || [];
+
+    function escaparHTML(texto) {
+      const div = document.createElement('div');
+      div.textContent = texto;
+      return div.innerHTML;
+    }
+
+    function seleccionarCoordenadas(lat, lng, origen) {
+      puntoSeleccionado = { lat: Number(lat.toFixed(6)), lng: Number(lng.toFixed(6)) };
+      origenSeleccion = origen;
+
+      document.getElementById('coords-display').textContent =
+        `📍 ${origen}: Lat ${puntoSeleccionado.lat}, Lng ${puntoSeleccionado.lng}`;
+
+      if (marcadorTemporal) {
+        mapa.removeLayer(marcadorTemporal);
+      }
+
+      marcadorTemporal = L.circleMarker([puntoSeleccionado.lat, puntoSeleccionado.lng], {
+        radius: 9,
+        color: '#f59e0b',
+        fillColor: '#f59e0b',
+        fillOpacity: 0.75
+      }).addTo(mapa).bindPopup('Ubicación seleccionada para nueva alerta').openPopup();
+    }
+
+    // Evento: Clic en cualquier parte del mapa para generar alerta
+    mapa.on('click', function(e) {
+      seleccionarCoordenadas(e.latlng.lat, e.latlng.lng, 'Selección manual en mapa');
+    });
+
+    // Evento: Obtener ubicación mediante GPS del dispositivo
+    function obtenerUbicacionGPS() {
+      const display = document.getElementById('coords-display');
+      if (!navigator.geolocation) {
+        display.textContent = '❌ Tu navegador no soporta geolocalización GPS.';
+        return;
+      }
+
+      display.textContent = '🛰️ Obteniendo señal GPS...';
+
+      navigator.geolocation.getCurrentPosition(
+        function(pos) {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          seleccionarCoordenadas(lat, lng, 'GPS en tiempo real');
+          mapa.flyTo([lat, lng], 15);
+        },
+        function(err) {
+          display.textContent = '⚠️ No se pudo acceder al GPS (permiso denegado o señal débil). Puedes hacer clic directo en el mapa.';
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    }
+
+    // Crear icono llamativo para las alertas viales
+    const iconoAlerta = L.divIcon({
+      className: 'custom-alert-pin',
+      html: `<div style="background:#ef4444;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.5);">!</div>`,
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
+      popupAnchor: [0, -15]
+    });
+
+    function renderizarMarcador(alerta) {
+      const marker = L.marker([alerta.lat, alerta.lng], { icon: iconoAlerta }).addTo(mapa);
+
+      const popupHTML = `
+        <div style="min-width:200px;">
+          <strong style="color:#fcd34d;font-size:0.95rem;">${escaparHTML(alerta.tipo)}</strong>
+          <p style="margin:6px 0;font-size:0.85rem;color:#e2e8f0;">${escaparHTML(alerta.descripcion)}</p>
+          <small style="color:#94a3b8;display:block;">Origen: ${escaparHTML(alerta.origen)}</small>
+          <small style="color:#94a3b8;display:block;">Coordenadas: ${alerta.lat}, ${alerta.lng}</small>
+          <small style="color:#94a3b8;display:block;">Hora: ${escaparHTML(alerta.hora)}</small>
+          <button class="popup-remove-btn" onclick="eliminarAlerta('${alerta.id}')">🗑️ Quitar alerta</button>
+        </div>
+      `;
+
+      marker.bindPopup(popupHTML);
+      marcadoresActivos[alerta.id] = marker;
+    }
+
+    function actualizarListaAlertas() {
+      const contenedor = document.getElementById('lista-alertas-activas');
+      if (alertasGuardadas.length === 0) {
+        contenedor.innerHTML = `<p style="font-size:0.84rem;color:#94a3b8;">No hay alertas activas en este momento. Usa el GPS o haz clic en el mapa para crear una.</p>`;
+        return;
+      }
+
+      contenedor.innerHTML = alertasGuardadas.map(alerta => `
+        <div class="alert-item">
+          <div class="alert-item-info" onclick="enfocarAlerta('${alerta.id}')">
+            <strong>${escaparHTML(alerta.tipo)}</strong>
+            <small>${escaparHTML(alerta.descripcion)}</small>
+            <small>📍 ${alerta.lat}, ${alerta.lng} • ${escaparHTML(alerta.origen)} (${escaparHTML(alerta.hora)})</small>
+          </div>
+          <button type="button" class="btn-danger-sm" onclick="eliminarAlerta('${alerta.id}')">Quitar</button>
+        </div>
+      `).join('');
+    }
+
+    function guardarAlertaMapa() {
+      if (!puntoSeleccionado) {
+        alert('Primero selecciona un punto haciendo clic en el mapa o presionando "Generar Alerta con mi Ubicación GPS".');
+        return;
+      }
+
+      const tipo = document.getElementById('alerta-tipo').value;
+      const descInput = document.getElementById('alerta-desc');
+      const descripcion = descInput.value.trim() || 'Alerta vial preventiva reportada en corredor Sabana Centro.';
+
+      const nuevaAlerta = {
+        id: 'alerta_' + Date.now(),
+        lat: puntoSeleccionado.lat,
+        lng: puntoSeleccionado.lng,
+        tipo: tipo,
+        descripcion: descripcion,
+        origen: origenSeleccion,
+        hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      alertasGuardadas.unshift(nuevaAlerta);
+      localStorage.setItem('alertas_sabana_centro', JSON.stringify(alertasGuardadas));
+
+      if (marcadorTemporal) {
+        mapa.removeLayer(marcadorTemporal);
+        marcadorTemporal = null;
+      }
+
+      renderizarMarcador(nuevaAlerta);
+      actualizarListaAlertas();
+
+      // Abrir popup de la alerta recién creada
+      marcadoresActivos[nuevaAlerta.id].openPopup();
+
+      // Limpiar selección actual
+      descInput.value = '';
+      puntoSeleccionado = null;
+      document.getElementById('coords-display').textContent =
+        '✅ Alerta publicada en el mapa. Haz clic en otro punto o usa GPS para agregar otra.';
+    }
+
+    function enfocarAlerta(id) {
+      const alerta = alertasGuardadas.find(a => a.id === id);
+      if (alerta && marcadoresActivos[id]) {
+        mapa.flyTo([alerta.lat, alerta.lng], 15);
+        marcadoresActivos[id].openPopup();
+      }
+    }
+
+    function eliminarAlerta(id) {
+      if (marcadoresActivos[id]) {
+        mapa.removeLayer(marcadoresActivos[id]);
+        delete marcadoresActivos[id];
+      }
+      alertasGuardadas = alertasGuardadas.filter(a => a.id !== id);
+      localStorage.setItem('alertas_sabana_centro', JSON.stringify(alertasGuardadas));
+      actualizarListaAlertas();
+    }
+
+    // Restaurar marcadores existentes al abrir la página
+    alertasGuardadas.forEach(renderizarMarcador);
+    actualizarListaAlertas();
+
+    // Cambio de municipio foco + centrado automático del mapa
     function mostrarMunicipio(clave, boton) {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       boton.classList.add('active');
@@ -768,15 +1152,16 @@
         <h3>${info.titulo}</h3>
         <p style="color: #cbd5e1; margin-top: 0.4rem;">${info.desc}</p>
       `;
+      mapa.flyTo(info.coords, info.zoom);
     }
 
     // Verificar protocolo HTTPS en tiempo real
     if (window.location.protocol === 'https:') {
       document.getElementById('ssl-status-text').innerHTML =
-        '🔒 HTTPS Activo y Verificado — Certificado SSL/TLS DV (3 meses) Operando';
+        '🔒 HTTPS Activo y Verificado — Certificado SSL/TLS DV (3 meses / Google Trust Services)';
     }
 
-    // Función para abrir el widget sincrónico (Tawk.to o JivoChat)
+    // Widget sincrónico (Tawk.to o JivoChat)
     function abrirChatWeb() {
       if (typeof Tawk_API !== 'undefined' && Tawk_API.toggle) {
         Tawk_API.toggle();
@@ -787,7 +1172,7 @@
       }
     }
 
-    // Manejo del formulario asincrónico (Formspree + fallback mailto POP3/IMAP)
+    // Formulario asincrónico (Formspree + fallback mailto POP3/IMAP)
     document.getElementById('asyncForm').addEventListener('submit', function(e) {
       const action = this.getAttribute('action');
       if (action.includes('TU_ID_FORMSPREE')) {
@@ -803,9 +1188,7 @@
 
   <!-- ===================================================================== -->
   <!-- WIDGET DE MENSAJERÍA SINCRÓNICA WEB (SCRIPT JS)                       -->
-  <!-- Opción A (100% Gratis ilimitado): Crea cuenta en https://tawk.to y    -->
-  <!-- pega aquí tu <script> de Tawk.to.                                     -->
-  <!-- Opción B (Sugerida por profesor): Pega aquí el <script> de JivoChat.  -->
+  <!-- Pega aquí tu <script> gratuito de Tawk.to o JivoChat antes de </body> -->
   <!-- ===================================================================== -->
 
 </body>
