@@ -204,6 +204,12 @@
       transform: translateY(-2px);
     }
 
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
     .btn-primary {
       background: var(--primary);
       color: #0f172a;
@@ -424,7 +430,7 @@
 
     #mapa-vial {
       width: 100%;
-      height: 470px;
+      height: 490px;
       border-radius: 14px;
       border: 1px solid var(--border);
       z-index: 1;
@@ -438,6 +444,23 @@
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 0.5rem;
+    }
+
+    .sync-status {
+      font-size: 0.8rem;
+      padding: 0.45rem 0.75rem;
+      border-radius: 8px;
+      margin-bottom: 0.85rem;
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.14);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #6ee7b7;
+    }
+
+    .sync-status.local {
+      background: rgba(245, 158, 11, 0.14);
+      border-color: rgba(245, 158, 11, 0.4);
+      color: #fcd34d;
     }
 
     .coords-pill {
@@ -771,12 +794,12 @@
       </div>
     </section>
 
-    <!-- MAPA INTERACTIVO DE ALERTAS GEOLOCALIZADAS (NIVEL 5 - MEDIO OPERATIVO) -->
+    <!-- MAPA INTERACTIVO DE ALERTAS GEOLOCALIZADAS -->
     <section id="mapa-alertas">
       <div class="section-header">
         <span class="level-tag tag-mapa">Nivel 5 — Alertas Geolocalizadas en Zonas de Riesgo</span>
         <h2>Mapa Interactivo de Alertas Viales — Sabana Centro</h2>
-        <p>Genera alertas viales usando tu <strong>ubicación GPS</strong> o <strong>haciendo clic directamente sobre el punto del mapa</strong>. También puedes eliminar cualquier alerta cuando el riesgo haya sido resuelto.</p>
+        <p>Las alertas publicadas se sincronizan en la nube para visualizarse en tiempo real desde cualquier celular o computador.</p>
       </div>
 
       <!-- Filtro rápido por Municipio Foco -->
@@ -806,6 +829,10 @@
 
         <!-- Panel de Control de Alertas -->
         <div class="card">
+          <div id="cloud-sync-badge" class="sync-status local">
+            🟡 Verificando conexión con base de datos en la nube...
+          </div>
+
           <h3>🚨 Generar o Quitar Alerta Vial</h3>
           <p style="margin-bottom: 0.75rem;">Selecciona ubicación por GPS o tocando el mapa:</p>
 
@@ -828,13 +855,13 @@
 
             <input type="text" id="alerta-desc" placeholder="Ej: Glorieta entrada Chía, pavimento húmedo y sin señalización..." />
 
-            <button type="button" class="btn btn-primary" onclick="guardarAlertaMapa()">
+            <button type="button" class="btn btn-primary" id="btn-publicar-alerta" onclick="guardarAlertaMapa()">
               Publicar Alerta en el Mapa
             </button>
           </div>
 
           <div class="alerts-feed" id="lista-alertas-activas">
-            <!-- Las alertas creadas se listan aquí con su botón para quitar -->
+            <!-- Las alertas activas se listan aquí -->
           </div>
         </div>
       </div>
@@ -936,6 +963,24 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
   <script>
+    // =========================================================================
+    // CONFIGURACIÓN DE BASE DE DATOS EN LA NUBE (FIREBASE REALTIME DATABASE)
+    // Pega aquí tu URL de Firebase (sin barra inclinada al final), por ejemplo:
+    // const FIREBASE_DB_URL = "https://seguridad-vial-sabana-default-rtdb.firebaseio.com";
+    // =========================================================================
+    const FIREBASE_DB_URL = "PEGA_AQUI_TU_URL_DE_FIREBASE";
+
+    const nubeConfigurada = FIREBASE_DB_URL.startsWith("https://");
+    const syncBadge = document.getElementById("cloud-sync-badge");
+
+    if (nubeConfigurada) {
+      syncBadge.className = "sync-status";
+      syncBadge.textContent = "🟢 Nube Multi-Dispositivo Activa (Sincronización en vivo)";
+    } else {
+      syncBadge.className = "sync-status local";
+      syncBadge.textContent = "🟡 Modo Local: Pega tu URL de Firebase en el código para ver alertas en otros dispositivos";
+    }
+
     // 1. Datos de Municipios Foco con Coordenadas de Sabana Centro
     const datosMunicipios = {
       chia: {
@@ -976,13 +1021,11 @@
     let marcadorTemporal = null;
     let origenSeleccion = "Clic en mapa";
     const marcadoresActivos = {};
-
-    // Cargar alertas guardadas en el navegador (localStorage)
-    let alertasGuardadas = JSON.parse(localStorage.getItem('alertas_sabana_centro')) || [];
+    let alertasActuales = [];
 
     function escaparHTML(texto) {
       const div = document.createElement('div');
-      div.textContent = texto;
+      div.textContent = texto || '';
       return div.innerHTML;
     }
 
@@ -1005,12 +1048,10 @@
       }).addTo(mapa).bindPopup('Ubicación seleccionada para nueva alerta').openPopup();
     }
 
-    // Evento: Clic en cualquier parte del mapa para generar alerta
     mapa.on('click', function(e) {
       seleccionarCoordenadas(e.latlng.lat, e.latlng.lng, 'Selección manual en mapa');
     });
 
-    // Evento: Obtener ubicación mediante GPS del dispositivo
     function obtenerUbicacionGPS() {
       const display = document.getElementById('coords-display');
       if (!navigator.geolocation) {
@@ -1027,14 +1068,13 @@
           seleccionarCoordenadas(lat, lng, 'GPS en tiempo real');
           mapa.flyTo([lat, lng], 15);
         },
-        function(err) {
-          display.textContent = '⚠️ No se pudo acceder al GPS (permiso denegado o señal débil). Puedes hacer clic directo en el mapa.';
+        function() {
+          display.textContent = '⚠️ No se pudo acceder al GPS (permiso denegado o señal débil). Haz clic directo en el mapa.';
         },
         { enableHighAccuracy: true, timeout: 10000 }
       );
     }
 
-    // Crear icono llamativo para las alertas viales
     const iconoAlerta = L.divIcon({
       className: 'custom-alert-pin',
       html: `<div style="background:#ef4444;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.5);">!</div>`,
@@ -1044,6 +1084,8 @@
     });
 
     function renderizarMarcador(alerta) {
+      if (marcadoresActivos[alerta.id]) return;
+
       const marker = L.marker([alerta.lat, alerta.lng], { icon: iconoAlerta }).addTo(mapa);
 
       const popupHTML = `
@@ -1061,14 +1103,29 @@
       marcadoresActivos[alerta.id] = marker;
     }
 
-    function actualizarListaAlertas() {
+    function sincronizarVisualizacion(listaAlertas) {
+      alertasActuales = listaAlertas;
+      const idsVigentes = new Set(listaAlertas.map(a => a.id));
+
+      // 1. Quitar del mapa marcadores que fueron eliminados desde otro dispositivo
+      Object.keys(marcadoresActivos).forEach(id => {
+        if (!idsVigentes.has(id)) {
+          mapa.removeLayer(marcadoresActivos[id]);
+          delete marcadoresActivos[id];
+        }
+      });
+
+      // 2. Agregar al mapa marcadores nuevos
+      listaAlertas.forEach(renderizarMarcador);
+
+      // 3. Actualizar panel lateral
       const contenedor = document.getElementById('lista-alertas-activas');
-      if (alertasGuardadas.length === 0) {
+      if (listaAlertas.length === 0) {
         contenedor.innerHTML = `<p style="font-size:0.84rem;color:#94a3b8;">No hay alertas activas en este momento. Usa el GPS o haz clic en el mapa para crear una.</p>`;
         return;
       }
 
-      contenedor.innerHTML = alertasGuardadas.map(alerta => `
+      contenedor.innerHTML = listaAlertas.map(alerta => `
         <div class="alert-item">
           <div class="alert-item-info" onclick="enfocarAlerta('${alerta.id}')">
             <strong>${escaparHTML(alerta.tipo)}</strong>
@@ -1080,18 +1137,44 @@
       `).join('');
     }
 
-    function guardarAlertaMapa() {
+    // Cargar alertas desde Firebase (o localStorage si aún no se pega la URL)
+    async function cargarAlertas() {
+      if (!nubeConfigurada) {
+        const locales = JSON.parse(localStorage.getItem('alertas_sabana_centro')) || [];
+        sincronizarVisualizacion(locales);
+        return;
+      }
+
+      try {
+        const resp = await fetch(`${FIREBASE_DB_URL}/alertas.json`);
+        if (!resp.ok) throw new Error('Error de lectura en Firebase');
+        const data = await resp.json();
+
+        const lista = data
+          ? Object.entries(data).map(([id, val]) => ({ id, ...val })).reverse()
+          : [];
+
+        sincronizarVisualizacion(lista);
+      } catch (err) {
+        console.error('Error sincronizando alertas:', err);
+      }
+    }
+
+    async function guardarAlertaMapa() {
       if (!puntoSeleccionado) {
         alert('Primero selecciona un punto haciendo clic en el mapa o presionando "Generar Alerta con mi Ubicación GPS".');
         return;
       }
 
+      const btn = document.getElementById('btn-publicar-alerta');
+      btn.disabled = true;
+      btn.textContent = 'Publicando...';
+
       const tipo = document.getElementById('alerta-tipo').value;
       const descInput = document.getElementById('alerta-desc');
       const descripcion = descInput.value.trim() || 'Alerta vial preventiva reportada en corredor Sabana Centro.';
 
-      const nuevaAlerta = {
-        id: 'alerta_' + Date.now(),
+      const payload = {
         lat: puntoSeleccionado.lat,
         lng: puntoSeleccionado.lng,
         tipo: tipo,
@@ -1100,48 +1183,77 @@
         hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
-      alertasGuardadas.unshift(nuevaAlerta);
-      localStorage.setItem('alertas_sabana_centro', JSON.stringify(alertasGuardadas));
+      try {
+        let nuevoId = 'alerta_' + Date.now();
 
-      if (marcadorTemporal) {
-        mapa.removeLayer(marcadorTemporal);
-        marcadorTemporal = null;
+        if (nubeConfigurada) {
+          const resp = await fetch(`${FIREBASE_DB_URL}/alertas.json`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (!resp.ok) throw new Error('No se pudo guardar en Firebase');
+          const resData = await resp.json();
+          nuevoId = resData.name;
+          await cargarAlertas();
+        } else {
+          const locales = JSON.parse(localStorage.getItem('alertas_sabana_centro')) || [];
+          locales.unshift({ id: nuevoId, ...payload });
+          localStorage.setItem('alertas_sabana_centro', JSON.stringify(locales));
+          sincronizarVisualizacion(locales);
+        }
+
+        if (marcadorTemporal) {
+          mapa.removeLayer(marcadorTemporal);
+          marcadorTemporal = null;
+        }
+
+        if (marcadoresActivos[nuevoId]) {
+          marcadoresActivos[nuevoId].openPopup();
+        }
+
+        descInput.value = '';
+        puntoSeleccionado = null;
+        document.getElementById('coords-display').textContent =
+          '✅ Alerta publicada y visible en todos los dispositivos.';
+      } catch (err) {
+        alert('Error al guardar la alerta. Verifica que la URL de Firebase y las reglas en modo de prueba estén activas.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Publicar Alerta en el Mapa';
       }
-
-      renderizarMarcador(nuevaAlerta);
-      actualizarListaAlertas();
-
-      // Abrir popup de la alerta recién creada
-      marcadoresActivos[nuevaAlerta.id].openPopup();
-
-      // Limpiar selección actual
-      descInput.value = '';
-      puntoSeleccionado = null;
-      document.getElementById('coords-display').textContent =
-        '✅ Alerta publicada en el mapa. Haz clic en otro punto o usa GPS para agregar otra.';
     }
 
     function enfocarAlerta(id) {
-      const alerta = alertasGuardadas.find(a => a.id === id);
+      const alerta = alertasActuales.find(a => a.id === id);
       if (alerta && marcadoresActivos[id]) {
         mapa.flyTo([alerta.lat, alerta.lng], 15);
         marcadoresActivos[id].openPopup();
       }
     }
 
-    function eliminarAlerta(id) {
-      if (marcadoresActivos[id]) {
-        mapa.removeLayer(marcadoresActivos[id]);
-        delete marcadoresActivos[id];
+    async function eliminarAlerta(id) {
+      if (nubeConfigurada) {
+        try {
+          await fetch(`${FIREBASE_DB_URL}/alertas/${id}.json`, {
+            method: 'DELETE'
+          });
+          await cargarAlertas();
+        } catch (err) {
+          alert('No se pudo eliminar la alerta de la nube.');
+        }
+      } else {
+        const locales = (JSON.parse(localStorage.getItem('alertas_sabana_centro')) || []).filter(a => a.id !== id);
+        localStorage.setItem('alertas_sabana_centro', JSON.stringify(locales));
+        sincronizarVisualizacion(locales);
       }
-      alertasGuardadas = alertasGuardadas.filter(a => a.id !== id);
-      localStorage.setItem('alertas_sabana_centro', JSON.stringify(alertasGuardadas));
-      actualizarListaAlertas();
     }
 
-    // Restaurar marcadores existentes al abrir la página
-    alertasGuardadas.forEach(renderizarMarcador);
-    actualizarListaAlertas();
+    // Carga inicial y actualización automática cada 5 segundos para multi-dispositivo
+    cargarAlertas();
+    if (nubeConfigurada) {
+      setInterval(cargarAlertas, 5000);
+    }
 
     // Cambio de municipio foco + centrado automático del mapa
     function mostrarMunicipio(clave, boton) {
