@@ -879,7 +879,7 @@
       </div>
 
       <div class="comms-layout">
-        <!-- Columna 1: Mensajería Sincrónica -->
+        <!-- Columna 1: Mensajería Sincrónica (Sin WhatsApp) -->
         <div class="card">
           <h3>⚡ Mensajería Sincrónica (Tiempo Real)</h3>
           <p>Atención inmediata para alertas viales, emergencias y consultas en vivo desde web o móvil.</p>
@@ -893,25 +893,18 @@
               <span class="badge-live">En línea</span>
             </a>
 
-            <a href="https://wa.me/573000000000?text=Hola,%20deseo%20reportar%20una%20alerta%20vial%20para%20motociclistas%20en%20Sabana%20Centro" target="_blank" rel="noopener" class="channel-btn">
+            <!-- Reemplaza TU_USUARIO_TELEGRAM por tu usuario o bot de Telegram -->
+            <a href="https://t.me/TU_USUARIO_TELEGRAM" target="_blank" rel="noopener" class="channel-btn">
               <div class="channel-meta">
-                <strong>2. Integración Móvil — WhatsApp</strong>
-                <small>Línea directa de reporte rápido desde smartphone</small>
-              </div>
-              <span class="badge-live">Móvil</span>
-            </a>
-
-            <a href="https://t.me/SeguridadVialSabanaCentroBot" target="_blank" rel="noopener" class="channel-btn">
-              <div class="channel-meta">
-                <strong>3. Integración Móvil — Telegram</strong>
-                <small>Canal y bot de alertas geolocalizadas en tiempo real</small>
+                <strong>2. Integración Móvil — Telegram</strong>
+                <small>Canal directo / bot de alertas geolocalizadas en tiempo real</small>
               </div>
               <span class="badge-live">Telegram</span>
             </a>
 
             <a href="xmpp:soporte@jabber.hot-chilli.net?message;body=Reporte%20Vial%20Sabana%20Centro" class="channel-btn">
               <div class="channel-meta">
-                <strong>4. Protocolo Abierto XMPP</strong>
+                <strong>3. Protocolo Abierto XMPP</strong>
                 <small>Cliente Jabber/XMPP (soporte@jabber.hot-chilli.net)</small>
               </div>
               <span class="badge-live">XMPP</span>
@@ -956,7 +949,7 @@
       </div>
       <div>
         <h4>Arquitectura de Mensajería</h4>
-        <p>Soporte híbrido: Sincrónica (Widget JS tawk.to, WhatsApp, Telegram, XMPP) y Asincrónica (Correo POP3/IMAP).</p>
+        <p>Soporte híbrido: Sincrónica (Widget JS tawk.to, Telegram, XMPP) y Asincrónica (Correo POP3/IMAP).</p>
       </div>
     </div>
   </footer>
@@ -1107,7 +1100,6 @@
       alertasActuales = listaAlertas;
       const idsVigentes = new Set(listaAlertas.map(a => a.id));
 
-      // 1. Quitar del mapa marcadores que fueron eliminados desde otro dispositivo
       Object.keys(marcadoresActivos).forEach(id => {
         if (!idsVigentes.has(id)) {
           mapa.removeLayer(marcadoresActivos[id]);
@@ -1115,10 +1107,8 @@
         }
       });
 
-      // 2. Agregar al mapa marcadores nuevos
       listaAlertas.forEach(renderizarMarcador);
 
-      // 3. Actualizar panel lateral
       const contenedor = document.getElementById('lista-alertas-activas');
       if (listaAlertas.length === 0) {
         contenedor.innerHTML = `<p style="font-size:0.84rem;color:#94a3b8;">No hay alertas activas en este momento. Usa el GPS o haz clic en el mapa para crear una.</p>`;
@@ -1137,7 +1127,6 @@
       `).join('');
     }
 
-    // Cargar alertas desde Firebase
     async function cargarAlertas() {
       if (!nubeConfigurada) {
         const locales = JSON.parse(localStorage.getItem('alertas_sabana_centro')) || [];
@@ -1249,13 +1238,11 @@
       }
     }
 
-    // Carga inicial y actualización automática cada 5 segundos para multi-dispositivo
     cargarAlertas();
     if (nubeConfigurada) {
       setInterval(cargarAlertas, 5000);
     }
 
-    // Cambio de municipio foco + centrado automático del mapa
     function mostrarMunicipio(clave, boton) {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       boton.classList.add('active');
@@ -1267,13 +1254,11 @@
       mapa.flyTo(info.coords, info.zoom);
     }
 
-    // Verificar protocolo HTTPS en tiempo real
     if (window.location.protocol === 'https:') {
       document.getElementById('ssl-status-text').innerHTML =
         '🔒 HTTPS Activo y Verificado — Certificado SSL/TLS DV (3 meses / Google Trust Services)';
     }
 
-    // Widget sincrónico (tawk.to)
     function abrirChatWeb() {
       if (typeof Tawk_API !== 'undefined' && Tawk_API.maximize) {
         Tawk_API.maximize();
@@ -1284,7 +1269,6 @@
       }
     }
 
-    // Formulario asincrónico conectado a Formspree (POP3 / IMAP)
     document.getElementById('asyncForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const form = e.target;
