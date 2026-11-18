@@ -588,6 +588,10 @@
       color: var(--emerald);
       display: none;
       margin-top: 0.4rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: 8px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
     }
 
     /* Estilo popup Leaflet */
@@ -884,7 +888,7 @@
             <a href="javascript:void(0)" onclick="abrirChatWeb()" class="channel-btn">
               <div class="channel-meta">
                 <strong>1. Chat Web Embebido (Script JS)</strong>
-                <small>Widget en vivo integrado mediante Tawk.to / JivoChat</small>
+                <small>Widget en vivo integrado mediante tawk.to</small>
               </div>
               <span class="badge-live">En línea</span>
             </a>
@@ -920,7 +924,7 @@
           <h3>📩 Mensajería Asincrónica (Correo POP3 / IMAP)</h3>
           <p>Envío de reportes detallados, propuestas de infraestructura y solicitudes recibidas en bandeja institucional IMAP/POP3.</p>
 
-          <form id="asyncForm" action="https://formspree.io/f/TU_ID_FORMSPREE" method="POST">
+          <form id="asyncForm" action="https://formspree.io/f/maeoovjb" method="POST">
             <input type="text" name="nombre" placeholder="Nombre del ciudadano o motociclista" required />
             <input type="email" name="email" placeholder="Tu correo electrónico (para respuesta IMAP/POP3)" required />
             <select name="municipio" required>
@@ -931,10 +935,8 @@
               <option value="Zipaquira">Zipaquirá</option>
             </select>
             <textarea name="mensaje" rows="3" placeholder="Describe el punto crítico vial, falla de señalización o sugerencia..." required></textarea>
-            <button type="submit" class="btn btn-primary">Enviar Reporte por Correo (IMAP/POP3)</button>
-            <div class="form-status" id="form-status">
-              ✅ Reporte preparado. Si aún no configuras Formspree, se abrirá tu cliente de correo POP3/IMAP predeterminado.
-            </div>
+            <button type="submit" id="btn-enviar-correo" class="btn btn-primary">Enviar Reporte por Correo (IMAP/POP3)</button>
+            <div class="form-status" id="form-status"></div>
           </form>
         </div>
       </div>
@@ -954,7 +956,7 @@
       </div>
       <div>
         <h4>Arquitectura de Mensajería</h4>
-        <p>Soporte híbrido: Sincrónica (Widget JS Tawk.to/JivoChat, WhatsApp, Telegram, XMPP) y Asincrónica (Correo POP3/IMAP).</p>
+        <p>Soporte híbrido: Sincrónica (Widget JS tawk.to, WhatsApp, Telegram, XMPP) y Asincrónica (Correo POP3/IMAP).</p>
       </div>
     </div>
   </footer>
@@ -964,9 +966,7 @@
 
   <script>
     // =========================================================================
-    // CONFIGURACIÓN DE BASE DE DATOS EN LA NUBE (FIREBASE REALTIME DATABASE)
-    // Pega aquí tu URL de Firebase (sin barra inclinada al final), por ejemplo:
-    // const FIREBASE_DB_URL = "https://seguridad-vial-sabana-default-rtdb.firebaseio.com";
+    // BASE DE DATOS EN LA NUBE (FIREBASE REALTIME DATABASE)
     // =========================================================================
     const FIREBASE_DB_URL = "https://seguridad-vial-sabana-centro-default-rtdb.firebaseio.com";
 
@@ -978,7 +978,7 @@
       syncBadge.textContent = "🟢 Nube Multi-Dispositivo Activa (Sincronización en vivo)";
     } else {
       syncBadge.className = "sync-status local";
-      syncBadge.textContent = "🟡 Modo Local: Pega tu URL de Firebase en el código para ver alertas en otros dispositivos";
+      syncBadge.textContent = "🟡 Modo Local: Configura tu URL de Firebase";
     }
 
     // 1. Datos de Municipios Foco con Coordenadas de Sabana Centro
@@ -1047,608 +1047,7 @@
         fillOpacity: 0.75
       }).addTo(mapa).bindPopup('Ubicación seleccionada para nueva alerta').openPopup();
     }
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Observatorio de Seguridad Vial | Motociclistas Sabana Centro</title>
-  
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Leaflet.js (Mapa Interactivo OpenStreetMap) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  
-  <!-- Iconos FontAwesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-  <style>
-    #map {
-      height: 460px;
-      width: 100%;
-      z-index: 10;
-      border-radius: 0.75rem;
-    }
-    .leaflet-popup-content-wrapper {
-      border-radius: 0.65rem;
-    }
-  </style>
-</head>
-<body class="bg-slate-950 text-slate-100 font-sans antialiased">
-
-  <!-- BARRA SUPERIOR / ESTADO DE INFRAESTRUCTURA -->
-  <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-30">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="bg-amber-500 text-slate-950 p-2.5 rounded-xl font-bold text-lg shadow-md">
-          <i class="fa-solid fa-motorcycle"></i>
-        </div>
-        <div>
-          <h1 class="text-lg md:text-xl font-extrabold tracking-tight text-white">
-            Sabana Centro Vial <span class="text-amber-400">Observatorio</span>
-          </h1>
-          <p class="text-xs text-slate-400">Chía • Cota • Cajicá • Zipaquirá</p>
-        </div>
-      </div>
-
-      <div class="flex flex-wrap items-center gap-2 text-xs">
-        <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-full font-medium flex items-center gap-1.5">
-          <i class="fa-solid fa-lock"></i> HTTPS / TLS (Certificado DV 90 días)
-        </span>
-        <a href="#mapa-alertas" class="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg transition">Mapa Vial</a>
-        <a href="#mensajeria-sincronica" class="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg transition">Chat Sincrónico</a>
-        <a href="#mensajeria-asincronica" class="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg transition">Correo POP3/IMAP</a>
-      </div>
-    </div>
-  </header>
-
-  <!-- SECCIÓN HERO -->
-  <section class="bg-gradient-to-b from-slate-900 to-slate-950 border-b border-slate-800/80 py-10 px-4">
-    <div class="max-w-7xl mx-auto grid md:grid-cols-3 gap-6 items-center">
-      <div class="md:col-span-2 space-y-4">
-        <span class="inline-block bg-amber-500/15 text-amber-400 border border-amber-500/30 text-xs font-semibold px-3 py-1 rounded-full">
-          Red Colaborativa de Prevención y Movilidad Segura
-        </span>
-        <h2 class="text-3xl md:text-4xl font-extrabold text-white leading-tight">
-          Monitoreo en tiempo real de puntos críticos para motociclistas en <span class="text-amber-400">Sabana Centro</span>
-        </h2>
-        <p class="text-slate-300 text-sm md:text-base max-w-2xl">
-          Plataforma web para reportar incidentes viales mediante geolocalización GPS, recibir asistencia inmediata por canales sincrónicos y gestionar reportes formales mediante correo electrónico asincrónico.
-        </p>
-        <div class="flex flex-wrap gap-3 pt-1">
-          <a href="#mapa-alertas" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-sm transition flex items-center gap-2">
-            <i class="fa-solid fa-location-dot"></i> Reportar Punto Crítico
-          </a>
-          <button onclick="abrirChatWeb()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition flex items-center gap-2">
-            <i class="fa-solid fa-comments"></i> Abrir Chat Web en Vivo
-          </button>
-        </div>
-      </div>
-
-      <!-- TARJETA RESUMEN DE COBERTURA -->
-      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 space-y-3 shadow-xl">
-        <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400">Corredores Monitoreados</h3>
-        <div class="grid grid-cols-2 gap-2.5 text-sm">
-          <button onclick="centrarMunicipio(4.8616, -74.0325, 'Chía')" class="bg-slate-800/80 hover:bg-amber-500/20 hover:border-amber-500/40 border border-slate-700 p-3 rounded-xl text-left transition">
-            <div class="font-bold text-white">Chía</div>
-            <div class="text-xs text-slate-400">Variante / Av. Pradilla</div>
-          </button>
-          <button onclick="centrarMunicipio(4.8087, -74.1018, 'Cota')" class="bg-slate-800/80 hover:bg-amber-500/20 hover:border-amber-500/40 border border-slate-700 p-3 rounded-xl text-left transition">
-            <div class="font-bold text-white">Cota</div>
-            <div class="text-xs text-slate-400">Vía Siberia - Suba</div>
-          </button>
-          <button onclick="centrarMunicipio(4.9186, -74.0280, 'Cajicá')" class="bg-slate-800/80 hover:bg-amber-500/20 hover:border-amber-500/40 border border-slate-700 p-3 rounded-xl text-left transition">
-            <div class="font-bold text-white">Cajicá</div>
-            <div class="text-xs text-slate-400">Variante / Sector Molino</div>
-          </button>
-          <button onclick="centrarMunicipio(5.0221, -73.9994, 'Zipaquirá')" class="bg-slate-800/80 hover:bg-amber-500/20 hover:border-amber-500/40 border border-slate-700 p-3 rounded-xl text-left transition">
-            <div class="font-bold text-white">Zipaquirá</div>
-            <div class="text-xs text-slate-400">Paso Nacional / Ubaté</div>
-          </button>
-        </div>
-        <p class="text-[11px] text-slate-400 pt-1">
-          <i class="fa-solid fa-crosshairs text-amber-400 mr-1"></i> Haz clic en un municipio para enfocar el mapa.
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- SECCIÓN 1: MAPA INTERACTIVO Y ALERTAS SINCRONIZADAS EN LA NUBE -->
-  <main id="mapa-alertas" class="max-w-7xl mx-auto px-4 py-10 space-y-12">
-    <section class="space-y-4">
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 class="text-2xl font-bold text-white flex items-center gap-2">
-            <i class="fa-solid fa-map-location-dot text-amber-400"></i> Mapa Interactivo de Alertas Viales
-          </h2>
-          <p class="text-sm text-slate-400">Haz clic directamente sobre el mapa o usa tu GPS para marcar riesgos y sincronizarlos en todos los dispositivos.</p>
-        </div>
-
-        <!-- INDICADOR DE CONEXIÓN FIREBASE -->
-        <div id="cloudStatus" class="bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-semibold px-3.5 py-2 rounded-full">
-          🟡 Conectando con Firebase Realtime Database...
-        </div>
-      </div>
-
-      <div class="grid lg:grid-cols-3 gap-6">
-        <!-- MAPA LEAFLET -->
-        <div class="lg:col-span-2 bg-slate-900 border border-slate-800 p-3 rounded-2xl shadow-lg space-y-3">
-          <div id="map"></div>
-          <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400 px-1">
-            <span><i class="fa-solid fa-hand-pointer text-amber-400 mr-1"></i> Clic en cualquier punto del mapa selecciona las coordenadas automáticamente.</span>
-            <button onclick="cargarAlertas()" class="text-amber-400 hover:underline font-medium">
-              <i class="fa-solid fa-rotate"></i> Actualizar ahora
-            </button>
-          </div>
-        </div>
-
-        <!-- FORMULARIO PARA CREAR ALERTA -->
-        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-lg flex flex-col justify-between space-y-4">
-          <form id="alertForm" class="space-y-3.5">
-            <h3 class="text-lg font-bold text-white border-b border-slate-800 pb-2">
-              Nueva Alerta en Mapa
-            </h3>
-
-            <button type="button" onclick="obtenerUbicacionGPS()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2 px-3 rounded-xl text-xs transition flex items-center justify-center gap-2">
-              <i class="fa-solid fa-location-crosshairs"></i> Obtener mi ubicación GPS actual
-            </button>
-
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-xs text-slate-400 mb-1">Latitud</label>
-                <input type="number" step="any" id="latInput" required placeholder="4.8616"
-                  class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-amber-400 focus:outline-none" />
-              </div>
-              <div>
-                <label class="block text-xs text-slate-400 mb-1">Longitud</label>
-                <input type="number" step="any" id="lngInput" required placeholder="-74.0325"
-                  class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-amber-400 focus:outline-none" />
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">Municipio</label>
-              <select id="municipioInput" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-400 focus:outline-none">
-                <option value="Chía">Chía</option>
-                <option value="Cota">Cota</option>
-                <option value="Cajicá">Cajicá</option>
-                <option value="Zipaquirá">Zipaquirá</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">Tipo de Riesgo Vial</label>
-              <select id="tipoInput" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-400 focus:outline-none">
-                <option value="Hueco / Cráter Peligroso">⚠️ Hueco / Cráter Peligroso</option>
-                <option value="Accidente de Motocicleta">🚨 Accidente de Motocicleta</option>
-                <option value="Derrame de Aceite / Piso Liso">🛢️ Derrame de Aceite / Piso Liso</option>
-                <option value="Obras sin Señalización">🚧 Obras sin Señalización</option>
-                <option value="Baja Visibilidad / Neblina">🌫️ Baja Visibilidad / Neblina</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">Descripción breve</label>
-              <textarea id="descInput" rows="2" required placeholder="Ej: Hueco profundo en carril derecho sentido Chía - Cajicá..."
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-400 focus:outline-none"></textarea>
-            </div>
-
-            <button type="submit" id="btnGuardarAlerta" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2">
-              <i class="fa-solid fa-cloud-arrow-up"></i> Publicar Alerta Global
-            </button>
-          </form>
-
-          <!-- LISTADO DE ALERTAS ACTIVAS CON OPCIÓN DE BORRADO INDIVIDUAL -->
-          <div class="border-t border-slate-800 pt-3">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold text-slate-300">Alertas Activas (<span id="contadorAlertas">0</span>)</span>
-              <span class="text-[11px] text-slate-500">Sync cada 4s</span>
-            </div>
-            <div id="listaAlertas" class="max-h-44 overflow-y-auto space-y-2 pr-1 text-xs">
-              <p class="text-slate-500 italic">No hay alertas registradas aún.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECCIÓN 2: MENSAJERÍA SINCRÓNICA (CHAT WEB + MÓVIL + XMPP) -->
-    <section id="mensajeria-sincronica" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 space-y-6">
-      <div class="border-b border-slate-800 pb-4">
-        <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Comunicación en Tiempo Real</span>
-        <h2 class="text-2xl font-bold text-white mt-1">Canales de Mensajería Sincrónica</h2>
-        <p class="text-sm text-slate-400 mt-1">Atención inmediata para emergencias en ruta y coordinación directa entre motociclistas de la Sabana.</p>
-      </div>
-
-      <div class="grid md:grid-cols-3 gap-5">
-        <!-- 1. CHAT WEB EMBEBIDO (TAWK.TO) -->
-        <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 flex flex-col justify-between space-y-4">
-          <div class="space-y-2">
-            <div class="w-10 h-10 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-lg">
-              <i class="fa-solid fa-comment-dots"></i>
-            </div>
-            <h3 class="font-bold text-white text-base">1. Chat Web Embebido (Script JS)</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">
-              Widget sincrónico integrado directamente en el navegador mediante <strong>tawk.to</strong>. Permite conversación bidireccional instantánea sin salir del observatorio.
-            </p>
-          </div>
-          <button onclick="abrirChatWeb()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2">
-            <i class="fa-solid fa-headset"></i> Abrir Ventana de Chat en Vivo
-          </button>
-        </div>
-
-        <!-- 2. MENSAJERÍA MÓVIL (WHATSAPP & TELEGRAM) -->
-        <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 flex flex-col justify-between space-y-4">
-          <div class="space-y-2">
-            <div class="w-10 h-10 rounded-lg bg-sky-500/15 text-sky-400 flex items-center justify-center text-lg">
-              <i class="fa-brands fa-whatsapp"></i>
-            </div>
-            <h3 class="font-bold text-white text-base">2. Mensajería Instantánea Móvil</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">
-              Enlaces profundos (<em>Deep Links</em>) hacia clientes móviles para compartir ubicación en vivo y fotografías de incidentes en vía.
-            </p>
-          </div>
-          <div class="grid grid-cols-2 gap-2">
-            <a href="https://wa.me/573000000000?text=Hola,%20reporto%20una%20novedad%20vial%20en%20Sabana%20Centro" target="_blank" rel="noopener"
-              class="bg-green-600 hover:bg-green-500 text-white font-semibold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-1.5">
-              <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
-            </a>
-            <a href="https://t.me/share/url?url=https://seguridad-vial-sabana-centro.onrender.com&text=Alerta%20Vial%20Sabana%20Centro" target="_blank" rel="noopener"
-              class="bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-1.5">
-              <i class="fa-brands fa-telegram text-sm"></i> Telegram
-            </a>
-          </div>
-        </div>
-
-        <!-- 3. PROTOCOLO XMPP -->
-        <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 flex flex-col justify-between space-y-4">
-          <div class="space-y-2">
-            <div class="w-10 h-10 rounded-lg bg-purple-500/15 text-purple-400 flex items-center justify-center text-lg">
-              <i class="fa-solid fa-network-wired"></i>
-            </div>
-            <h3 class="font-bold text-white text-base">3. Protocolo Abierto XMPP (Jabber)</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">
-              Estándar abierto basado en XML para mensajería federada en tiempo real compatible con clientes como Pidgin o Conversations.
-            </p>
-          </div>
-          <a href="xmpp:soporte@jabber.hot-chilli.net?message;body=Reporte%20Vial%20Sabana%20Centro"
-            class="w-full bg-purple-600 hover:bg-purple-500 text-white font-semibold py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2">
-            <i class="fa-solid fa-paper-plane"></i> Conectar vía URI xmpp:
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECCIÓN 3: MENSAJERÍA ASINCRÓNICA (POP3 / IMAP POR CORREO ELECTRÓNICO) -->
-    <section id="mensajeria-asincronica" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8">
-      <div class="grid md:grid-cols-5 gap-8 items-start">
-        <div class="md:col-span-2 space-y-4">
-          <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Comunicación Diferida</span>
-          <h2 class="text-2xl font-bold text-white">Mensajería Asincrónica (POP3 / IMAP)</h2>
-          <p class="text-sm text-slate-300 leading-relaxed">
-            Para reportes detallados, solicitudes de auditoría vial o envío de evidencias que no requieren respuesta simultánea, el sistema despacha mensajes estructurados hacia un buzón de correo electrónico.
-          </p>
-          <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2 text-xs text-slate-400">
-            <div class="font-bold text-slate-200 flex items-center gap-2">
-              <i class="fa-solid fa-envelope-open-text text-amber-400"></i> Flujo de Protocolos de Correo:
-            </div>
-            <p>• <strong>Envío Web (SMTP Relay):</strong> El formulario transmite el reporte sin requerir servidor backend propio.</p>
-            <p>• <strong>Recepción IMAP:</strong> Sincroniza carpetas y estado de lectura en múltiples dispositivos.</p>
-            <p>• <strong>Descarga POP3:</strong> Permite respaldo local histórico de reportes ciudadanos.</p>
-          </div>
-        </div>
-
-        <!-- FORMULARIO ASINCRÓNICO -->
-        <form id="asyncForm" action="https://formspree.io/f/TU_ID_FORMSPREE" method="POST"
-          class="md:col-span-3 bg-slate-950 border border-slate-800 rounded-xl p-5 space-y-4">
-          <h3 class="font-bold text-white text-base border-b border-slate-800 pb-2">
-            Enviar Reporte Formal al Buzón del Observatorio
-          </h3>
-
-          <div class="grid sm:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">Nombre del Motociclista</label>
-              <input type="text" name="nombre" required placeholder="Ej: Santiago Bustos"
-                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-400 focus:outline-none" />
-            </div>
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">Correo de Respuesta</label>
-              <input type="email" name="email" required placeholder="usuario@correo.com"
-                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-400 focus:outline-none" />
-            </div>
-          </div>
-
-          <div class="grid sm:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">Municipio del Reporte</label>
-              <select name="municipio" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-400 focus:outline-none">
-                <option value="Chía">Chía</option>
-                <option value="Cota">Cota</option>
-                <option value="Cajicá">Cajicá</option>
-                <option value="Zipaquirá">Zipaquirá</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">Asunto</label>
-              <input type="text" name="asunto" required placeholder="Solicitud de señalización / Reporte"
-                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-400 focus:outline-none" />
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-xs text-slate-400 mb-1">Detalle del Mensaje Asincrónico</label>
-            <textarea name="mensaje" rows="3" required placeholder="Describa la ubicación exacta, horario y observaciones del tramo vial..."
-              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-400 focus:outline-none"></textarea>
-          </div>
-
-          <div id="asyncFeedback" class="hidden text-xs p-3 rounded-lg"></div>
-
-          <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs transition flex items-center gap-2">
-            <i class="fa-solid fa-envelope"></i> Enviar Correo Asincrónico
-          </button>
-        </form>
-      </div>
-    </section>
-  </main>
-
-  <!-- FOOTER TÉCNICO -->
-  <footer class="bg-slate-900 border-t border-slate-800 py-6 px-4 text-xs text-slate-400">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
-      <div>
-        <strong class="text-slate-200">Observatorio de Seguridad Vial Sabana Centro</strong> — Desplegado en Render Static Site con SSL/TLS (90 días).
-      </div>
-      <div class="flex flex-wrap gap-4">
-        <span><i class="fa-solid fa-database text-emerald-400 mr-1"></i> Firebase RTDB</span>
-        <span><i class="fa-solid fa-map text-amber-400 mr-1"></i> Leaflet + OpenStreetMap</span>
-        <span><i class="fa-solid fa-comments text-sky-400 mr-1"></i> tawk.to + XMPP + IMAP/POP3</span>
-      </div>
-    </div>
-  </footer>
-
-  <!-- LÓGICA DE MAPA Y SINCRONIZACIÓN FIREBASE -->
-  <script>
-    const FIREBASE_DB_URL = "https://seguridad-vial-sabana-centro-default-rtdb.firebaseio.com";
-
-    // Inicializar mapa centrado en Sabana Centro (Chía - Cajicá - Cota - Zipaquirá)
-    const map = L.map('map').setView([4.895, -74.035], 11);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    let marcadorSeleccion = null;
-    const capaAlertas = L.layerGroup().addTo(map);
-
-    // Icono personalizado para alertas viales
-    const iconoAlerta = L.divIcon({
-      className: 'custom-div-icon',
-      html: `<div style="background:#ef4444;color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.5);font-size:13px;"><i class="fa-solid fa-triangle-exclamation"></i></div>`,
-      iconSize: [28, 28],
-      iconAnchor: [14, 14]
-    });
-
-    function centrarMunicipio(lat, lng, nombre) {
-      map.flyTo([lat, lng], 14, { duration: 1.2 });
-      document.getElementById('municipioInput').value = nombre;
-    }
-
-    // Seleccionar coordenadas haciendo clic en el mapa
-    map.on('click', function (e) {
-      const lat = e.latlng.lat.toFixed(6);
-      const lng = e.latlng.lng.toFixed(6);
-      document.getElementById('latInput').value = lat;
-      document.getElementById('lngInput').value = lng;
-
-      if (marcadorSeleccion) {
-        map.removeLayer(marcadorSeleccion);
-      }
-      marcadorSeleccion = L.marker([lat, lng]).addTo(map)
-        .bindPopup(`<b>Punto seleccionado</b><br>Lat: ${lat}, Lng: ${lng}`)
-        .openPopup();
-    });
-
-    // Geolocalización HTML5 (requiere HTTPS)
-    function obtenerUbicacionGPS() {
-      if (!navigator.geolocation) {
-        alert("Tu navegador no soporta geolocalización.");
-        return;
-      }
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude.toFixed(6);
-          const lng = pos.coords.longitude.toFixed(6);
-          document.getElementById('latInput').value = lat;
-          document.getElementById('lngInput').value = lng;
-          map.flyTo([lat, lng], 15);
-          if (marcadorSeleccion) map.removeLayer(marcadorSeleccion);
-          marcadorSeleccion = L.marker([lat, lng]).addTo(map)
-            .bindPopup("📍 Tu ubicación GPS actual")
-            .openPopup();
-        },
-        (err) => {
-          alert("No se pudo obtener el GPS. Verifica los permisos de ubicación o haz clic en el mapa.");
-        },
-        { enableHighAccuracy: true }
-      );
-    }
-
-    // Cargar alertas desde Firebase Realtime Database
-    async function cargarAlertas() {
-      const statusEl = document.getElementById('cloudStatus');
-      const listaEl = document.getElementById('listaAlertas');
-      const contadorEl = document.getElementById('contadorAlertas');
-
-      try {
-        const res = await fetch(`${FIREBASE_DB_URL}/alertas.json`);
-        if (!res.ok) throw new Error("Error HTTP " + res.status);
-        const data = await res.json();
-
-        statusEl.className = "bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-semibold px-3.5 py-2 rounded-full";
-        statusEl.textContent = "🟢 Nube Multi-Dispositivo Activa";
-
-        capaAlertas.clearLayers();
-        listaEl.innerHTML = "";
-
-        if (!data) {
-          contadorEl.textContent = "0";
-          listaEl.innerHTML = '<p class="text-slate-500 italic">No hay alertas activas. Haz clic en el mapa para crear la primera.</p>';
-          return;
-        }
-
-        const entradas = Object.entries(data).reverse();
-        contadorEl.textContent = entradas.length;
-
-        entradas.forEach(([id, alerta]) => {
-          // Dibujar pin en el mapa
-          const marker = L.marker([alerta.lat, alerta.lng], { icon: iconoAlerta }).addTo(capaAlertas);
-          marker.bindPopup(`
-            <div style="min-width:190px;color:#0f172a;font-family:sans-serif;">
-              <strong style="color:#dc2626;font-size:13px;">${alerta.tipo}</strong><br>
-              <span style="font-size:11px;font-weight:bold;color:#475569;">📍 ${alerta.municipio}</span>
-              <p style="margin:6px 0;font-size:12px;">${alerta.descripcion}</p>
-              <div style="font-size:10px;color:#64748b;margin-bottom:6px;">${alerta.fecha || ''}</div>
-              <button onclick="eliminarAlerta('${id}')" style="background:#ef4444;color:white;border:none;padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer;width:100%;">
-                🗑️ Eliminar esta alerta
-              </button>
-            </div>
-          `);
-
-          // Agregar tarjeta en la lista lateral
-          const item = document.createElement('div');
-          item.className = "bg-slate-950 border border-slate-800 rounded-lg p-2.5 flex items-start justify-between gap-2";
-          item.innerHTML = `
-            <div class="cursor-pointer" onclick="map.flyTo([${alerta.lat}, ${alerta.lng}], 15)">
-              <div class="font-bold text-amber-400">${alerta.tipo}</div>
-              <div class="text-slate-300">${alerta.municipio}: <span class="text-slate-400">${alerta.descripcion}</span></div>
-              <div class="text-[10px] text-slate-500 mt-0.5">${alerta.fecha || ''}</div>
-            </div>
-            <button onclick="eliminarAlerta('${id}')" title="Eliminar alerta" class="text-rose-400 hover:text-rose-300 p-1">
-              <i class="fa-solid fa-trash"></i>
-            </button>
-          `;
-          listaEl.appendChild(item);
-        });
-      } catch (error) {
-        statusEl.className = "bg-rose-500/15 border border-rose-500/40 text-rose-300 text-xs font-semibold px-3.5 py-2 rounded-full";
-        statusEl.textContent = "🔴 Error de conexión con Firebase";
-      }
-    }
-
-    // Guardar nueva alerta en Firebase
-    document.getElementById('alertForm').addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const btn = document.getElementById('btnGuardarAlerta');
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
-
-      const nuevaAlerta = {
-        lat: parseFloat(document.getElementById('latInput').value),
-        lng: parseFloat(document.getElementById('lngInput').value),
-        municipio: document.getElementById('municipioInput').value,
-        tipo: document.getElementById('tipoInput').value,
-        descripcion: document.getElementById('descInput').value.trim(),
-        fecha: new Date().toLocaleString('es-CO')
-      };
-
-      try {
-        const res = await fetch(`${FIREBASE_DB_URL}/alertas.json`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(nuevaAlerta)
-        });
-        if (!res.ok) throw new Error("No se pudo guardar");
-
-        document.getElementById('descInput').value = "";
-        if (marcadorSeleccion) {
-          map.removeLayer(marcadorSeleccion);
-          marcadorSeleccion = null;
-        }
-        await cargarAlertas();
-      } catch (err) {
-        alert("Error al publicar la alerta en Firebase. Verifica las reglas de escritura.");
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Publicar Alerta Global';
-      }
-    });
-
-    // Eliminar alerta individual
-    async function eliminarAlerta(id) {
-      try {
-        await fetch(`${FIREBASE_DB_URL}/alertas/${id}.json`, {
-          method: 'DELETE'
-        });
-        await cargarAlertas();
-      } catch (err) {
-        alert("No se pudo eliminar la alerta.");
-      }
-    }
-
-    // Abrir widget sincrónico de tawk.to
-    function abrirChatWeb() {
-      if (window.Tawk_API && typeof window.Tawk_API.maximize === 'function') {
-        window.Tawk_API.maximize();
-      } else {
-        alert("El widget de chat en vivo se está cargando. También puedes abrirlo desde la burbuja verde en la esquina inferior derecha.");
-      }
-    }
-
-    // Manejo del formulario asincrónico (Formspree)
-    document.getElementById('asyncForm').addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const form = e.target;
-      const feedback = document.getElementById('asyncFeedback');
-
-      if (form.action.includes('TU_ID_FORMSPREE')) {
-        feedback.className = "text-xs p-3 rounded-lg bg-amber-500/15 border border-amber-500/40 text-amber-300";
-        feedback.textContent = "⚠️ Falta reemplazar 'TU_ID_FORMSPREE' en el atributo action del formulario con tu endpoint real de formspree.io.";
-        feedback.classList.remove('hidden');
-        return;
-      }
-
-      try {
-        const res = await fetch(form.action, {
-          method: 'POST',
-          body: new FormData(form),
-          headers: { 'Accept': 'application/json' }
-        });
-        if (res.ok) {
-          feedback.className = "text-xs p-3 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-300";
-          feedback.textContent = "✅ Reporte enviado correctamente al correo del observatorio (IMAP/POP3).";
-          form.reset();
-        } else {
-          throw new Error();
-        }
-      } catch {
-        feedback.className = "text-xs p-3 rounded-lg bg-rose-500/15 border border-rose-500/40 text-rose-300";
-        feedback.textContent = "❌ No se pudo enviar el correo. Verifica tu ID de Formspree.";
-      }
-      feedback.classList.remove('hidden');
-    });
-
-    // Carga inicial y refresco automático cada 4 segundos
-    cargarAlertas();
-    setInterval(cargarAlertas, 4000);
-  </script>
-
-  <!--Start of Tawk.to Script-->
-  <script type="text/javascript">
-  var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-  (function(){
-  var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-  s1.async=true;
-  s1.src='https://embed.tawk.to/6afcf2de57157d3cc2f9acd9/1k7m19d6g';
-  s1.charset='UTF-8';
-  s1.setAttribute('crossorigin','*');
-  s0.parentNode.insertBefore(s1,s0);
-  })();
-  </script>
-  <!--End of Tawk.to Script-->
-</body>
-</html>
     mapa.on('click', function(e) {
       seleccionarCoordenadas(e.latlng.lat, e.latlng.lng, 'Selección manual en mapa');
     });
@@ -1738,7 +1137,7 @@
       `).join('');
     }
 
-    // Cargar alertas desde Firebase (o localStorage si aún no se pega la URL)
+    // Cargar alertas desde Firebase
     async function cargarAlertas() {
       if (!nubeConfigurada) {
         const locales = JSON.parse(localStorage.getItem('alertas_sabana_centro')) || [];
@@ -1874,35 +1273,66 @@
         '🔒 HTTPS Activo y Verificado — Certificado SSL/TLS DV (3 meses / Google Trust Services)';
     }
 
-    // Widget sincrónico (Tawk.to o JivoChat)
+    // Widget sincrónico (tawk.to)
     function abrirChatWeb() {
-      if (typeof Tawk_API !== 'undefined' && Tawk_API.toggle) {
+      if (typeof Tawk_API !== 'undefined' && Tawk_API.maximize) {
+        Tawk_API.maximize();
+      } else if (typeof Tawk_API !== 'undefined' && Tawk_API.toggle) {
         Tawk_API.toggle();
-      } else if (typeof jivo_api !== 'undefined' && jivo_api.open) {
-        jivo_api.open();
       } else {
-        alert('Pega tu código <script> gratuito de Tawk.to o JivoChat antes de </body> para abrir el chat en vivo aquí.');
+        alert('El chat en vivo de tawk.to está cargando. También puedes abrirlo desde la burbuja verde abajo a la derecha.');
       }
     }
 
-    // Formulario asincrónico (Formspree + fallback mailto POP3/IMAP)
-    document.getElementById('asyncForm').addEventListener('submit', function(e) {
-      const action = this.getAttribute('action');
-      if (action.includes('TU_ID_FORMSPREE')) {
-        e.preventDefault();
-        const nombre = this.nombre.value;
-        const municipio = this.municipio.value;
-        const mensaje = this.mensaje.value;
-        document.getElementById('form-status').style.display = 'block';
-        window.location.href = `mailto:seguridadvial.sabanacentro@gmail.com?subject=Reporte%20Vial%20-%20${encodeURIComponent(municipio)}&body=Ciudadano:%20${encodeURIComponent(nombre)}%0A%0A${encodeURIComponent(mensaje)}`;
+    // Formulario asincrónico conectado a Formspree (POP3 / IMAP)
+    document.getElementById('asyncForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const statusEl = document.getElementById('form-status');
+      const btn = document.getElementById('btn-enviar-correo');
+
+      btn.disabled = true;
+      btn.textContent = 'Enviando reporte...';
+
+      try {
+        const resp = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (resp.ok) {
+          statusEl.style.display = 'block';
+          statusEl.style.color = '#6ee7b7';
+          statusEl.textContent = '✅ Reporte enviado correctamente al buzón del observatorio (IMAP/POP3).';
+          form.reset();
+        } else {
+          throw new Error('Error en Formspree');
+        }
+      } catch (err) {
+        statusEl.style.display = 'block';
+        statusEl.style.color = '#fca5a5';
+        statusEl.textContent = '❌ No se pudo enviar el reporte. Verifica tu conexión o revisa Formspree.';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Enviar Reporte por Correo (IMAP/POP3)';
       }
     });
   </script>
 
-  <!-- ===================================================================== -->
-  <!-- WIDGET DE MENSAJERÍA SINCRÓNICA WEB (SCRIPT JS)                       -->
-  <!-- Pega aquí tu <script> gratuito de Tawk.to o JivoChat antes de </body> -->
-  <!-- ===================================================================== -->
+  <!--Start of Tawk.to Script-->
+  <script type="text/javascript">
+  var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+  (function(){
+  var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+  s1.async=true;
+  s1.src='https://embed.tawk.to/6afcf2de57157d3cc2f9acd9/1k7m19d6g';
+  s1.charset='UTF-8';
+  s1.setAttribute('crossorigin','*');
+  s0.parentNode.insertBefore(s1,s0);
+  })();
+  </script>
+  <!--End of Tawk.to Script-->
 
 </body>
 </html>
